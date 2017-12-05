@@ -10,10 +10,11 @@ enum State {
     Default,
     InSymbol(String),
     InString(String),
+    InStringEscape(String),
 }
 
 impl State {
-    pub fn handle_state (self, c: char, tokens: &mut Vec<Token>) -> Self {
+    fn handle_state (self, c: char, tokens: &mut Vec<Token>) -> Self {
         use self::Token::*;
         match self {
             State::Default => {
@@ -26,12 +27,8 @@ impl State {
                         tokens.push(CloseParen);
                         State::Default
                     },
-                    '"' => {
-                        State::InString(String::new())
-                    },
-                    ' ' => {
-                        State::Default
-                    }
+                    '"' => State::InString(String::new()),
+                    ' ' => State::Default,
                     _ => {
                         let mut s = String::new();
                         s.push(c);
@@ -46,19 +43,16 @@ impl State {
                        tokens.push(Symbol(s));
                        State::Default
                     },
-
                     '(' => {
                        tokens.push(Symbol(s));
                        tokens.push(OpenParen);
                        State::Default
                     }
-
                     ')' => {
                        tokens.push(Symbol(s));
                        tokens.push(CloseParen);
                        State::Default
                     }
-
                     _ => {
                         s.push(c);
                         State::InSymbol(s)
@@ -72,6 +66,7 @@ impl State {
                         tokens.push(Str(s));
                         State::Default
                     },
+                    '\\' => State::InStringEscape(s),
 
                     _ => {
                         s.push(c);
@@ -79,6 +74,11 @@ impl State {
                     },
                 }
             },
+
+            State::InStringEscape(mut s) => {
+                s.push(c);
+                State::InString(s)
+            }
         }
     }
 }
@@ -90,6 +90,7 @@ pub fn tokenize(s: &str) -> Vec<Token> {
         state = state.handle_state(c, &mut tokens);
     }
     match state {
+        // TODO make errors
         State::InSymbol(s) => tokens.push(Token::Symbol(s)),
         State::InString(s) => tokens.push(Token::Str(s)),
         _ => {}
