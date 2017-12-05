@@ -3,7 +3,6 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-mod lisp;
 mod tokenizer;
 use tokenizer::tokenize;
 
