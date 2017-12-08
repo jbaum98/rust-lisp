@@ -3,30 +3,30 @@ extern crate itertools;
 use self::itertools::Itertools;
 
 #[derive(Debug)]
-pub enum Expr {
-    Symbol(String),
+pub enum Ast {
+    Atom(String),
+    Int(i32),
     Str(String),
-    Apply(Box<Expr>, Vec<Expr>),
-    NullList,
+    List(Vec<Ast>),
 }
 
-impl Display for Expr {
+impl Display for Ast {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
-        use self::Expr::*;
+        use self::Ast::*;
         match *self {
-            Symbol(ref s) => write!(fmt, "{}", s),
+            Atom(ref s) => write!(fmt, "{}", s),
+            Int(ref i) => write!(fmt, "{}", i),
             Str(ref s) => write!(fmt, "\"{}\"", s),
-            Apply(ref head, ref tail) =>
-               write!(fmt, "({} {})", head, tail.iter().format(" ")),
-            NullList => write!(fmt, "()"),
+            List(ref xs) =>
+               write!(fmt, "({})", xs.iter().format(" ")),
         }
     }
 }
 
-pub struct Exprs(pub Vec<Expr>);
+pub struct DispAst(pub Vec<Ast>);
 
-impl Display for Exprs {
+impl Display for DispAst {
     fn fmt(&self, fmt: &mut Formatter) -> Result <(), Error> {
-        write!(fmt, "{}", self.0.iter().format(" "))
+        write!(fmt, "[{}]", self.0.iter().format(", "))
     }
 }

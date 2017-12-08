@@ -3,13 +3,9 @@ extern crate rustyline;
 use rustyline::error::ReadlineError;
 use rustyline::Editor;
 
-mod tokenizer;
-use tokenizer::tokenize;
-
 mod ast;
-use ast::Exprs;
-mod parser;
-use parser::parse;
+mod lisp;
+use lisp::parse_Exprs;
 
 fn main() {
     let mut rl = Editor::<()>::new();
@@ -17,11 +13,9 @@ fn main() {
         let readline = rl.readline(":=> ");
         match readline {
             Ok(line) => {
-                let tokens = tokenize(&line);
-                println!("Tokens: {:?}", tokens);
-                let ast = parse(&tokens);
-                println!("AST: {:?}", ast);
-                println!("Pretty AST: {}", Exprs(ast));
+                let exprs = parse_Exprs(&line).unwrap();
+                println!("AST: {:?}", exprs);
+                println!("Pretty: {}", ast::DispAst(exprs));
             },
             Err(ReadlineError::Interrupted) => {
                 println!("CTRL-C");

@@ -1,0 +1,43 @@
+use std::str::FromStr;
+use ast::*;
+
+// Based on lisp.lalrop in https://github.com/tcr/oasis
+
+grammar;
+
+pub Exprs: Vec<Ast> = {
+    <v:(<Expr>)*> => v,
+};
+
+Expr: Ast = {
+    // Matching an S-Expr (sequence of expressions surrounded by parens).
+    "(" <Exprs> ")" => Ast::List(<>),
+    // Match a Num term.
+    Num => Ast::Int(<>),
+    // Match a double-quoted string.
+    r#""(?:[^"\\]|\\.)*""# => {
+      let val = <>;
+      Ast::Str(val[1..val.len() - 1].to_owned())
+    },
+    // Match any token and treat it as an atom.
+    Term => Ast::Atom(<>),
+};
+
+// Give numbers higher precedence than terms.
+match {
+    r"[+-]?[0-9]+" => NumRegex
+} else {
+    r#"[A-Za-z_?+*/.=<>-]+[0-9A-Za-z_?+*/.=<>-]*"# => TermRegex,
+    _
+}
+
+// Match any sequence of token characters. These tokens should not conflict
+// with the parsing sequences for quoted strings, numbers, parens, etc.
+Term: String = {
+  TermRegex => (<>).to_owned()
+};
+
+// Match any valid integer value and treat it as a 32-bit signed integer.
+Num: i32 = {
+   NumRegex => i32::from_str(<>).unwrap()
+};
