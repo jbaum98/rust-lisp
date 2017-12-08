@@ -13,12 +13,12 @@ pub enum Expr {
 impl Display for Expr {
     fn fmt(&self, fmt: &mut Formatter) -> Result<(), Error> {
         use self::Expr::*;
-        match self {
-            &Symbol(ref s) => write!(fmt, "{}", s),
-            &Str(ref s) => write!(fmt, "\"{}\"", s),
-            &Apply(ref head, ref tail) =>
-                write!(fmt, "({} {})", head, tail.iter().format(" ")),
-            &NullList => write!(fmt, "()"),
+        match *self {
+            Symbol(ref s) => write!(fmt, "{}", s),
+            Str(ref s) => write!(fmt, "\"{}\"", s),
+            Apply(ref head, ref tail) =>
+               write!(fmt, "({} {})", head, tail.iter().format(" ")),
+            NullList => write!(fmt, "()"),
         }
     }
 }

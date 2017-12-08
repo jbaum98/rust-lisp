@@ -32,12 +32,12 @@ impl State {
     }
 
     fn handle_token(mut self, t: &Token) -> Self {
-        match t {
-            &Token::OpenParen => {
+        match *t {
+            Token::OpenParen => {
                 self.in_progress.push(ExprToBe::Empty);
                 self
             },
-            &Token::CloseParen => {
+            Token::CloseParen => {
                 match self.in_progress.pop().unwrap() {
                     ExprToBe::Empty => {
                         self.push_expr(Expr::NullList)
@@ -47,11 +47,11 @@ impl State {
                     }
                 }
             },
-            &Token::Symbol(ref s) => {
+            Token::Symbol(ref s) => {
                 let s = Expr::Symbol(s.clone());
                 self.push_expr(s)
             },
-            &Token::Str(ref s) => {
+            Token::Str(ref s) => {
                 let s = Expr::Str(s.clone());
                 self.push_expr(s)
             },
